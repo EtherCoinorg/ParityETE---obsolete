@@ -18,6 +18,7 @@
 
 use uint::Uint;
 use hash::Address;
+use bytes::Bytes;
 
 /// Deserializable doppelganger of EthashParams.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
@@ -54,6 +55,14 @@ pub struct EthashParams {
 	/// See main EthashParams docs.
 	#[serde(rename="daoHardforkAccounts")]
 	pub dao_hardfork_accounts: Option<Vec<Address>>,
+
+	/// See main EthashParams docs.
+	#[serde(rename="etgHardforkTransition")]
+	pub etg_hardfork_transition: Option<Uint>,
+	#[serde(rename="etgHardforkDevAddress")]
+	pub etg_hardfork_dev_address: Option<Address>,
+	#[serde(rename="etgHardforkDevContract")]
+	pub etg_hardfork_dev_contract: Option<Bytes>,
 
 	/// See main EthashParams docs.
 	#[serde(rename="difficultyHardforkTransition")]
