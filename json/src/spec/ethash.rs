@@ -63,6 +63,10 @@ pub struct EthashParams {
 	pub etg_hardfork_dev_address: Option<Address>,
 	#[serde(rename="etgHardforkDevContract")]
 	pub etg_hardfork_dev_contract: Option<Bytes>,
+	#[serde(rename="etgHardforkBlockReward")]
+	pub etg_hardfork_block_reward: Option<Uint>,
+	#[serde(rename="etgHardforkBlockRewardHalvingInterval")]
+	pub etg_hardfork_block_reward_halving_interval: Option<Uint>,
 
 	/// See main EthashParams docs.
 	#[serde(rename="difficultyHardforkTransition")]

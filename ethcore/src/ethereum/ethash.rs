@@ -98,6 +98,10 @@ pub struct EthashParams {
 	pub etg_hardfork_dev_address: Address,
 	/// ETG hard-fork dev contract.
 	pub etg_hardfork_dev_contract: Bytes,
+	/// ETG hard-fork block reward.
+	pub etg_hardfork_block_reward: U256,
+	/// ETG hard-fork block reward halving interval.
+	pub etg_hardfork_block_reward_halving_interval: u64,
 }
 
 impl From<ethjson::spec::EthashParams> for EthashParams {
@@ -129,6 +133,8 @@ impl From<ethjson::spec::EthashParams> for EthashParams {
 			etg_hardfork_transition: p.etg_hardfork_transition.map_or(u64::max_value(), Into::into),
 			etg_hardfork_dev_address: p.etg_hardfork_dev_address.map_or_else(Address::new, Into::into),
 			etg_hardfork_dev_contract: p.etg_hardfork_dev_contract.map_or_else(Bytes::new, Into::into),
+			etg_hardfork_block_reward: p.etg_hardfork_block_reward.map_or_else(Default::default, Into::into),
+			etg_hardfork_block_reward_halving_interval: p.etg_hardfork_block_reward_halving_interval.map_or(u64::max_value(), Into::into),
 		}
 	}
 }
@@ -216,8 +222,19 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 		let author = *LiveBlock::header(&*block).author();
 		let number = LiveBlock::header(&*block).number();
 
-		// Applies EIP-649 reward.
-		let reward = if number >= self.ethash_params.eip649_transition {
+		// Applies ETG block reward.
+		let reward = if number >= self.ethash_params.etg_hardfork_transition {
+			// number of intervals
+			let intervals = (number - self.ethash_params.etg_hardfork_transition) /
+				self.ethash_params.etg_hardfork_block_reward_halving_interval;
+
+			// block reward is cut in half after each interval
+			if intervals >= 64 {
+				U256::from(0)
+			} else {
+				self.ethash_params.etg_hardfork_block_reward.shr(intervals as usize)
+			}
+		} else if number >= self.ethash_params.eip649_transition {
 			self.ethash_params.eip649_reward.unwrap_or(self.ethash_params.block_reward)
 		} else {
 			self.ethash_params.block_reward
@@ -233,7 +250,14 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 		let mut result_block_reward = reward + reward.shr(5) * U256::from(n_uncles);
 		let mut uncle_rewards = Vec::with_capacity(n_uncles);
 
-		if number >= self.ethash_params.mcip3_transition {
+		if number >= self.ethash_params.etg_hardfork_transition {
+			// 20% of the block reward go to the dev team
+			let dev_reward = result_block_reward * U256::from(2) / U256::from(10);
+			let author_reward = result_block_reward - dev_reward;
+
+			self.machine.add_balance(block, &self.ethash_params.etg_hardfork_dev_address, &dev_reward)?;
+			self.machine.add_balance(block, &author, &author_reward)?;
+		} else if number >= self.ethash_params.mcip3_transition {
 			result_block_reward = self.ethash_params.mcip3_miner_reward;
 			let ubi_contract = self.ethash_params.mcip3_ubi_contract;
 			let ubi_reward = self.ethash_params.mcip3_ubi_reward;
