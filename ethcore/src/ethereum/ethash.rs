@@ -22,6 +22,7 @@ use hash::{KECCAK_EMPTY_LIST_RLP};
 use ethash::{quick_get_difficulty, slow_hash_block_number, EthashManager, OptimizeFor};
 use bigint::prelude::U256;
 use bigint::hash::{H256, H64};
+use bytes::Bytes;
 use util::Address;
 use unexpected::{OutOfBounds, Mismatch};
 use block::*;
@@ -90,6 +91,13 @@ pub struct EthashParams {
 	pub eip649_delay: u64,
 	/// EIP-649 base reward.
 	pub eip649_reward: Option<U256>,
+
+	/// ETG hard-fork transition block.
+	pub etg_hardfork_transition: u64,
+	/// ETG hard-fork dev address.
+	pub etg_hardfork_dev_address: Address,
+	/// ETG hard-fork dev contract.
+	pub etg_hardfork_dev_contract: Bytes,
 }
 
 impl From<ethjson::spec::EthashParams> for EthashParams {
@@ -118,6 +126,9 @@ impl From<ethjson::spec::EthashParams> for EthashParams {
 			eip649_transition: p.eip649_transition.map_or(u64::max_value(), Into::into),
 			eip649_delay: p.eip649_delay.map_or(DEFAULT_EIP649_DELAY, Into::into),
 			eip649_reward: p.eip649_reward.map(Into::into),
+			etg_hardfork_transition: p.etg_hardfork_transition.map_or(u64::max_value(), Into::into),
+			etg_hardfork_dev_address: p.etg_hardfork_dev_address.map_or_else(Address::new, Into::into),
+			etg_hardfork_dev_contract: p.etg_hardfork_dev_contract.map_or_else(Bytes::new, Into::into),
 		}
 	}
 }
@@ -401,6 +412,9 @@ impl Ethash {
 			else if header.number() < self.ethash_params.ecip1010_continue_transition {
 				let fixed_difficulty = ((self.ethash_params.ecip1010_pause_transition / EXP_DIFF_PERIOD) - 2) as usize;
 				target = cmp::max(min_difficulty, target + (U256::from(1) << fixed_difficulty));
+			}
+			else if header.number() >= self.ethash_params.etg_hardfork_transition {
+				// no difficulty bomb
 			}
 			else {
 				let period = ((parent.number() + 1) / EXP_DIFF_PERIOD) as usize;
