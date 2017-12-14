@@ -423,7 +423,10 @@ impl Ethash {
 		};
 		target = cmp::max(min_difficulty, target);
 		if header.number() < self.ethash_params.bomb_defuse_transition {
-			if header.number() < self.ethash_params.ecip1010_pause_transition {
+			if header.number() >= self.ethash_params.etg_hardfork_transition {
+				// no difficulty bomb
+			}
+			else if header.number() < self.ethash_params.ecip1010_pause_transition {
 				let mut number = header.number();
 				if number >= self.ethash_params.eip649_transition {
 					number = number.saturating_sub(self.ethash_params.eip649_delay);
@@ -436,9 +439,6 @@ impl Ethash {
 			else if header.number() < self.ethash_params.ecip1010_continue_transition {
 				let fixed_difficulty = ((self.ethash_params.ecip1010_pause_transition / EXP_DIFF_PERIOD) - 2) as usize;
 				target = cmp::max(min_difficulty, target + (U256::from(1) << fixed_difficulty));
-			}
-			else if header.number() >= self.ethash_params.etg_hardfork_transition {
-				// no difficulty bomb
 			}
 			else {
 				let period = ((parent.number() + 1) / EXP_DIFF_PERIOD) as usize;
