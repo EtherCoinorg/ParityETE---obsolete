@@ -1,6 +1,6 @@
 {
-	"name": "Foundation",
-	"dataDir": "ethereum",
+	"name": "EthGold",
+	"dataDir": "etg",
 	"engine": {
 		"Ethash": {
 			"params": {
