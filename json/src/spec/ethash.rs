@@ -154,6 +154,8 @@ mod tests {
 	use bigint::prelude::{H160, U256};
 	use hash::Address;
 	use spec::ethash::{Ethash, EthashParams};
+	use bytes::Bytes;
+	use std::str::FromStr;
 
 	#[test]
 	fn ethash_deserialization() {
@@ -195,7 +197,12 @@ mod tests {
 				"eip150Transition": "0x43",
 				"eip160Transition": "0x45",
 				"eip161abcTransition": "0x46",
-				"eip161dTransition": "0x47"
+				"eip161dTransition": "0x47",
+				"etgHardforkTransition": 4880000,
+				"etgHardforkDevAddress": "0x807640a13483f8ac783c557fcdf27be11ea4ac7a",
+				"etgHardforkDevContract": "0x1234",
+				"etgHardforkBlockReward": 5,
+				"etgHardforkBlockRewardHalvingInterval": 500000
 			}
 		}"#;
 
@@ -254,6 +261,11 @@ mod tests {
 				eip649_transition: None,
 				eip649_delay: None,
 				eip649_reward: None,
+				etg_hardfork_transition: Some(Uint(U256::from(4880000))),
+				etg_hardfork_dev_address: Some(Address(H160::from("0x807640a13483f8ac783c557fcdf27be11ea4ac7a"))),
+				etg_hardfork_dev_contract: Some(Bytes::from_str("0x1234").unwrap()),
+				etg_hardfork_block_reward: Some(Uint(U256::from(5))),
+				etg_hardfork_block_reward_halving_interval: Some(Uint(U256::from(500000))),
 			}
 		});
 	}
@@ -300,6 +312,11 @@ mod tests {
 				eip649_transition: None,
 				eip649_delay: None,
 				eip649_reward: None,
+				etg_hardfork_transition: None,
+				etg_hardfork_dev_address: None,
+				etg_hardfork_dev_contract: None,
+				etg_hardfork_block_reward: None,
+				etg_hardfork_block_reward_halving_interval: None,
 			}
 		});
 	}
