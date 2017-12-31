@@ -1,4 +1,5 @@
 ## Parity [v1.7.3](https://github.com/paritytech/parity/releases/tag/v1.7.3) (2017-10-09)
+ETG 0.1
 
 Parity 1.7.3 enables the Byzantium fork for Ethereum main network on Block 4_370_000 and offers a variety of bug fixes and stability improvements. Among them:
 
