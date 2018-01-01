@@ -90,7 +90,7 @@ pub struct Transaction {
 	pub gas: U256,
 	/// Action, can be either call or contract create.
 	pub action: Action,
-	/// Transfered value.
+	/// Transferred value.
 	pub value: U256,
 	/// Transaction data.
 	pub data: Bytes,

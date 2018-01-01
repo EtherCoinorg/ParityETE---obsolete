@@ -113,7 +113,7 @@ impl fmt::Display for TransactionError {
 			RecipientBanned => "Recipient is temporarily banned.".into(),
 			CodeBanned => "Contract code is temporarily banned.".into(),
 			InvalidChainId => "Transaction of this chain ID is not allowed on this chain.".into(),
-			NotAllowed => "Sender does not have permissions to execute this type of transction".into(),
+			NotAllowed => "Sender does not have permissions to execute this type of transaction".into(),
 		};
 
 		f.write_fmt(format_args!("Transaction error ({})", msg))
