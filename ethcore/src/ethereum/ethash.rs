@@ -508,7 +508,7 @@ mod tests {
 	use error::{BlockError, Error};
 	use header::Header;
 	use spec::Spec;
-	use super::super::{new_morden, new_mcip3_test, new_homestead_test_machine};
+	use super::super::{new_morden, new_mcip3_test, new_homestead_test_machine, new_ethgold_test};
 	use super::{Ethash, EthashParams, ecip1017_eras_block_reward};
 	use rlp;
 
@@ -526,6 +526,25 @@ mod tests {
 		let b = OpenBlock::new(engine, Default::default(), false, db, &genesis_header, last_hashes, Address::zero(), (3141562.into(), 31415620.into()), vec![], false).unwrap();
 		let b = b.close();
 		assert_eq!(b.state().balance(&Address::zero()).unwrap(), U256::from_str("4563918244f40000").unwrap());
+	}
+
+    #[test]
+    fn test_etg_block_reward() {
+    }
+
+    #[test]
+    fn test_etg_on_close_block() {
+		let spec = new_ethgold_test(&::std::env::temp_dir());
+		let engine = &*spec.engine;
+		let genesis_header = spec.genesis_header();
+		let db = spec.ensure_db_good(get_temp_state_db(), &Default::default()).unwrap();
+		let last_hashes = Arc::new(vec![genesis_header.hash()]);
+		let b = OpenBlock::new(engine, Default::default(), false, db, &genesis_header, last_hashes, Address::zero(), (3141562.into(), 31415620.into()), vec![], false).unwrap();
+		let b = b.close();
+		let dev_address : Address = "00b59705b31e19ca295fbfd6d56c7b4effdc9ff9".into();
+		// the total block reward is 5 eth
+		assert_eq!(b.state().balance(&dev_address).unwrap(), U256::from_str("de0b6b3a7640000").unwrap()); // 1 eth
+		assert_eq!(b.state().balance(&Address::zero()).unwrap(), U256::from_str("3782dace9d900000").unwrap()); // 4 eth
 	}
 
 	#[test]
