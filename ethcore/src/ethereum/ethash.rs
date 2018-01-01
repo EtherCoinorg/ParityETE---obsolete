@@ -224,16 +224,10 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 
 		// Applies ETG block reward.
 		let reward = if number >= self.ethash_params.etg_hardfork_transition {
-			// number of intervals
-			let intervals = (number - self.ethash_params.etg_hardfork_transition) /
-				self.ethash_params.etg_hardfork_block_reward_halving_interval;
-
-			// block reward is cut in half after each interval
-			if intervals >= 64 {
-				U256::from(0)
-			} else {
-				self.ethash_params.etg_hardfork_block_reward.shr(intervals as usize)
-			}
+			calculate_etg_block_reward(self.ethash_params.etg_hardfork_transition,
+                                       self.ethash_params.etg_hardfork_block_reward_halving_interval,
+                                       self.ethash_params.etg_hardfork_block_reward,
+                                       number)
 		} else if number >= self.ethash_params.eip649_transition {
 			self.ethash_params.eip649_reward.unwrap_or(self.ethash_params.block_reward)
 		} else {
@@ -481,6 +475,27 @@ impl Header {
 	}
 }
 
+fn calculate_etg_block_reward(etg_hardfork_transition: u64,
+                              etg_reward_halving_interval: u64,
+                              etg_block_reward: U256,
+                              block_number: u64) -> U256 {
+	use std::ops::Shr;
+
+	if block_number < etg_hardfork_transition {
+		return U256::from(0);
+	}
+
+	// number of intervals
+	let intervals = (block_number - etg_hardfork_transition) / etg_reward_halving_interval;
+
+	// block reward is cut in half after each interval
+	if intervals >= 64 {
+		U256::from(0)
+	} else {
+		etg_block_reward.shr(intervals as usize)
+	}
+}
+
 fn ecip1017_eras_block_reward(era_rounds: u64, mut reward: U256, block_number:u64) -> (u64, U256) {
 	let eras = if block_number != 0 && block_number % era_rounds == 0 {
 		block_number / era_rounds - 1
@@ -509,7 +524,7 @@ mod tests {
 	use header::Header;
 	use spec::Spec;
 	use super::super::{new_morden, new_mcip3_test, new_homestead_test_machine, new_ethgold_test};
-	use super::{Ethash, EthashParams, ecip1017_eras_block_reward};
+	use super::{Ethash, EthashParams, ecip1017_eras_block_reward, calculate_etg_block_reward};
 	use rlp;
 
 	fn test_spec() -> Spec {
@@ -529,10 +544,6 @@ mod tests {
 	}
 
     #[test]
-    fn test_etg_block_reward() {
-    }
-
-    #[test]
     fn test_etg_on_close_block() {
 		let spec = new_ethgold_test(&::std::env::temp_dir());
 		let engine = &*spec.engine;
@@ -545,6 +556,54 @@ mod tests {
 		// the total block reward is 5 eth
 		assert_eq!(b.state().balance(&dev_address).unwrap(), U256::from_str("de0b6b3a7640000").unwrap()); // 1 eth
 		assert_eq!(b.state().balance(&Address::zero()).unwrap(), U256::from_str("3782dace9d900000").unwrap()); // 4 eth
+	}
+
+	#[test]
+	fn test_etg_block_reward() {
+		let etg_hardfork_transition = 10000u64;
+		let etg_reward_halving_interval = 500u64;
+		let etg_block_reward: U256 = "3782dace9d900000".parse().unwrap();
+
+		// before etg hard fork
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 9999u64),
+				   "0".into());
+
+		// just on etg hard fork
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 10000u64),
+				   "3782dace9d900000".into());
+		// after 1 interval
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 10500u64),
+				   "1BC16D674EC80000".into());
+		// after 2 intervals
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 11000u64),
+				   "DE0B6B3A7640000".into());
+		// 3
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 11500u64),
+				   "6F05B59D3B20000".into());
+		// 4
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 12000u64),
+				   "3782DACE9D90000".into());
+		// 5
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 12500u64),
+				   "1BC16D674EC8000".into());
+		// 6
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 13000u64),
+				   "DE0B6B3A764000".into());
+		// 7
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 13500u64),
+				   "6F05B59D3B2000".into());
+		// 8
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 14000u64),
+				   "3782DACE9D9000".into());
+		// 9
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 14500u64),
+				   "1BC16D674EC800".into());
+		// 10
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 15000u64),
+				   "DE0B6B3A76400".into());
+		// 64
+		assert_eq!(calculate_etg_block_reward(etg_hardfork_transition, etg_reward_halving_interval, etg_block_reward, 42000u64),
+				   "0".into());
 	}
 
 	#[test]
