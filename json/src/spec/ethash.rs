@@ -67,6 +67,10 @@ pub struct EthashParams {
 	pub etg_hardfork_block_reward: Option<Uint>,
 	#[serde(rename="etgHardforkBlockRewardHalvingInterval")]
 	pub etg_hardfork_block_reward_halving_interval: Option<Uint>,
+	#[serde(rename="etgHardforkFixedDifficultyEndsTransition")]
+	pub etg_hardfork_fixed_difficulty_ends_transition: Option<Uint>,
+	#[serde(rename="etgHardforkFixedDifficulty")]
+	pub etg_hardfork_fixed_difficulty: Option<Uint>,
 
 	/// See main EthashParams docs.
 	#[serde(rename="difficultyHardforkTransition")]
@@ -202,7 +206,9 @@ mod tests {
 				"etgHardforkDevAddress": "0x807640a13483f8ac783c557fcdf27be11ea4ac7a",
 				"etgHardforkDevContract": "0x1234",
 				"etgHardforkBlockReward": 5,
-				"etgHardforkBlockRewardHalvingInterval": 500000
+				"etgHardforkBlockRewardHalvingInterval": 500000,
+				"etgHardforkFixedDifficultyEndsTransition": 4900000,
+				"etgHardforkFixedDifficulty": "0x12345"
 			}
 		}"#;
 
@@ -266,6 +272,8 @@ mod tests {
 				etg_hardfork_dev_contract: Some(Bytes::from_str("0x1234").unwrap()),
 				etg_hardfork_block_reward: Some(Uint(U256::from(5))),
 				etg_hardfork_block_reward_halving_interval: Some(Uint(U256::from(500000))),
+				etg_hardfork_fixed_difficulty_ends_transition: Some(Uint(U256::from(4900000))),
+				etg_hardfork_fixed_difficulty: Some(Uint(U256::from(0x12345))),
 			}
 		});
 	}
@@ -317,6 +325,8 @@ mod tests {
 				etg_hardfork_dev_contract: None,
 				etg_hardfork_block_reward: None,
 				etg_hardfork_block_reward_halving_interval: None,
+				etg_hardfork_fixed_difficulty_ends_transition: None,
+				etg_hardfork_fixed_difficulty: None,
 			}
 		});
 	}

@@ -394,5 +394,7 @@ pub fn get_default_ethash_params() -> EthashParams {
 		etg_hardfork_dev_contract: Bytes::new(),
 		etg_hardfork_block_reward: 5.into(),
 		etg_hardfork_block_reward_halving_interval: 400000u64,
+		etg_hardfork_fixed_difficulty_ends_transition: 0,
+		etg_hardfork_fixed_difficulty: U256::from(0),
 	}
 }

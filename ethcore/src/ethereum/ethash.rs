@@ -102,6 +102,10 @@ pub struct EthashParams {
 	pub etg_hardfork_block_reward: U256,
 	/// ETG hard-fork block reward halving interval.
 	pub etg_hardfork_block_reward_halving_interval: u64,
+	/// ETG block which doesn't use the fixed difficulty
+	pub etg_hardfork_fixed_difficulty_ends_transition: u64,
+	/// ETG fixed difficulty during the start of the hard-fork
+	pub etg_hardfork_fixed_difficulty: U256,
 }
 
 impl From<ethjson::spec::EthashParams> for EthashParams {
@@ -135,6 +139,8 @@ impl From<ethjson::spec::EthashParams> for EthashParams {
 			etg_hardfork_dev_contract: p.etg_hardfork_dev_contract.map_or_else(Bytes::new, Into::into),
 			etg_hardfork_block_reward: p.etg_hardfork_block_reward.map_or_else(Default::default, Into::into),
 			etg_hardfork_block_reward_halving_interval: p.etg_hardfork_block_reward_halving_interval.map_or(u64::max_value(), Into::into),
+			etg_hardfork_fixed_difficulty_ends_transition: p.etg_hardfork_fixed_difficulty_ends_transition.map_or(0u64, Into::into),
+			etg_hardfork_fixed_difficulty: p.etg_hardfork_fixed_difficulty.map_or(p.minimum_difficulty.into(), Into::into),
 		}
 	}
 }
@@ -393,6 +399,9 @@ impl Ethash {
 			} else {
 				*parent.difficulty() + (*parent.difficulty() / difficulty_bound_divisor)
 			}
+		}
+		else if header.number() < self.ethash_params.etg_hardfork_fixed_difficulty_ends_transition {
+			self.ethash_params.etg_hardfork_fixed_difficulty
 		}
 		else {
 			trace!(target: "ethash", "Calculating difficulty parent.difficulty={}, header.timestamp={}, parent.timestamp={}", parent.difficulty(), header.timestamp(), parent.timestamp());
@@ -941,6 +950,48 @@ mod tests {
 		header.set_timestamp(parent_header.timestamp() + 420);
 		assert_eq!(
 			U256::from_str("5126FFD5BCBB9E7").unwrap(),
+			ethash.calculate_difficulty(&header, &parent_header)
+		);
+	}
+
+	#[test]
+	fn test_etg_difficulty() {
+		let machine = new_homestead_test_machine();
+		let ethparams = EthashParams {
+            etg_hardfork_transition: 4800000,
+			etg_hardfork_fixed_difficulty_ends_transition: 5000000,
+			etg_hardfork_fixed_difficulty: U256::from(151072),
+			..get_default_ethash_params()
+		};
+		let ethash = Ethash::new(&::std::env::temp_dir(), ethparams, machine, None);
+
+		let mut parent_header = Header::default();
+		parent_header.set_number(4900000);
+		parent_header.set_difficulty(U256::from_str("14944397EE8B").unwrap());
+		parent_header.set_timestamp(1513175023);
+		let mut header = Header::default();
+		header.set_number(parent_header.number() + 1);
+		header.set_timestamp(parent_header.timestamp() + 6);
+		assert_eq!(
+			U256::from(151072),
+			ethash.calculate_difficulty(&header, &parent_header)
+		);
+
+		parent_header.set_number(4999999);
+		parent_header.set_difficulty(U256::from(151072));
+		parent_header.set_timestamp(1514609324);
+		header.set_number(parent_header.number() + 1);
+		header.set_timestamp(parent_header.timestamp() + 10);
+		// the time diff is exactly 10 seconds, so the difficulty doesn't change at all.
+		assert_eq!(
+			U256::from(151072),
+			ethash.calculate_difficulty(&header, &parent_header)
+		);
+
+		// now the speed is smaller than 10 seconds.
+		header.set_timestamp(parent_header.timestamp() + 8);
+		assert_eq!(
+			U256::from(151145),
 			ethash.calculate_difficulty(&header, &parent_header)
 		);
 	}
