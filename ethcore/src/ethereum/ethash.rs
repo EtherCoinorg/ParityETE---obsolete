@@ -400,7 +400,8 @@ impl Ethash {
 				*parent.difficulty() + (*parent.difficulty() / difficulty_bound_divisor)
 			}
 		}
-		else if header.number() < self.ethash_params.etg_hardfork_fixed_difficulty_ends_transition {
+		else if header.number() >= self.ethash_params.etg_hardfork_transition &&
+				header.number() < self.ethash_params.etg_hardfork_fixed_difficulty_ends_transition {
 			self.ethash_params.etg_hardfork_fixed_difficulty
 		}
 		else {
