@@ -58,6 +58,9 @@ pub struct Params {
 	#[serde(rename="eip155Transition")]
 	pub eip155_transition: Option<Uint>,
 	/// See `CommonParams` docs.
+	#[serde(rename="etgHardforkTransition")]
+	pub etg_hardfork_transition: Option<Uint>,
+	/// See `CommonParams` docs.
 	#[serde(rename="validateChainIdTransition")]
 	pub validate_chain_id_transition: Option<Uint>,
 	/// See `CommonParams` docs.
@@ -136,7 +139,8 @@ mod tests {
 			"minGasLimit": "0x1388",
 			"accountStartNonce": "0x01",
 			"gasLimitBoundDivisor": "0x20",
-			"maxCodeSize": "0x1000"
+			"maxCodeSize": "0x1000",
+			"etgHardforkTransition": 4875184
 		}"#;
 
 		let deserialized: Params = serde_json::from_str(s).unwrap();
@@ -148,5 +152,6 @@ mod tests {
 		assert_eq!(deserialized.account_start_nonce, Some(Uint(U256::from(0x01))));
 		assert_eq!(deserialized.gas_limit_bound_divisor, Uint(U256::from(0x20)));
 		assert_eq!(deserialized.max_code_size, Some(Uint(U256::from(0x1000))));
+		assert_eq!(deserialized.etg_hardfork_transition, Some(Uint(U256::from(4875184))));
 	}
 }

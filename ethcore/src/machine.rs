@@ -368,8 +368,11 @@ impl EthereumMachine {
 
 		let chain_id = if header.number() < self.params().validate_chain_id_transition {
 			t.chain_id()
-		} else if header.number() >= self.params().eip155_transition {
+		} else if header.number() >= self.params().etg_hardfork_transition {
 			Some(self.params().chain_id)
+		} else if header.number() >= self.params().eip155_transition {
+			// ETH uses the network id
+			Some(self.params().network_id)
 		} else {
 			None
 		};
@@ -500,6 +503,55 @@ fn round_block_gas_limit(gas_limit: U256, lower_limit: U256, upper_limit: U256) 
 #[cfg(test)]
 mod tests {
 	use super::*;
+
+	#[test]
+	fn etg_test_chain_id() {
+		let spec = ::ethereum::new_ethgold_test(&::std::env::temp_dir());
+		let ethparams = ::tests::helpers::get_default_ethash_extensions();
+
+		let machine = EthereumMachine::with_ethash_extensions(
+			spec.params().clone(),
+			Default::default(),
+			ethparams,
+		);
+
+		{
+			// block number: 1
+			let env_info = EnvInfo {
+				number: 1u64,
+				..EnvInfo::default()
+			};
+			let result = machine.signing_chain_id(&env_info);
+			assert!(result.is_none());
+		}
+
+		{
+			let env_info = EnvInfo {
+				number: 2675000u64,
+				..EnvInfo::default()
+			};
+			let result = machine.signing_chain_id(&env_info);
+			assert_eq!(result, Some(1));
+		}
+
+		{
+			let env_info = EnvInfo {
+				number: 2875000u64,
+				..EnvInfo::default()
+			};
+			let result = machine.signing_chain_id(&env_info);
+			assert_eq!(result, Some(1));
+		}
+
+		{
+			let env_info = EnvInfo {
+				number: 3675000u64,
+				..EnvInfo::default()
+			};
+			let result = machine.signing_chain_id(&env_info);
+			assert_eq!(result, Some(0x88));
+		}
+	}
 
 	#[test]
 	fn ethash_gas_limit_is_multiple_of_determinant() {

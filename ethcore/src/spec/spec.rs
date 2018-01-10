@@ -83,6 +83,8 @@ pub struct CommonParams {
 	pub eip658_transition: BlockNumber,
 	/// Number of first block where EIP-155 rules begin.
 	pub eip155_transition: BlockNumber,
+	/// Number of first block of ETG
+	pub etg_hardfork_transition: BlockNumber,
 	/// Validate block receipts root.
 	pub validate_receipts_transition: BlockNumber,
 	/// Validate transaction chain id.
@@ -179,6 +181,7 @@ impl From<ethjson::spec::Params> for CommonParams {
 			},
 			eip98_transition: p.eip98_transition.map_or(0, Into::into),
 			eip155_transition: p.eip155_transition.map_or(0, Into::into),
+			etg_hardfork_transition: p.etg_hardfork_transition.map_or(BlockNumber::max_value(), Into::into),
 			validate_receipts_transition: p.validate_receipts_transition.map_or(0, Into::into),
 			validate_chain_id_transition: p.validate_chain_id_transition.map_or(0, Into::into),
 			eip86_transition: p.eip86_transition.map_or(
