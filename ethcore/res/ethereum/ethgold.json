@@ -159,8 +159,8 @@
 					"0xa5321a955a3158f4341C1A172B739163eE324293",
 					"0xb8170DCd2C82C96F8fe7a6625098ba02A9851a82"
 				],
-				"etgHardforkBlockReward": 5,
-				"etgHardforkBlockRewardHalvingInterval": 500000,
+				"etgHardforkBlockReward": "0x6124fee993bc0000",
+				"etgHardforkBlockRewardHalvingInterval": 3000000,
 				"etgHardforkFixedDifficultyEndsTransition": 5000000,
 				"etgHardforkFixedDifficulty": "0x030000"
 			}
