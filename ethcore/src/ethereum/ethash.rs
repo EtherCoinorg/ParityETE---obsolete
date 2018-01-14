@@ -106,6 +106,18 @@ pub struct EthashParams {
 	pub etg_hardfork_fixed_difficulty: U256,
 }
 
+impl EthashParams {
+	pub fn dump_etg_info(&self) {
+		// log all the necessary info for ETG network
+
+		info!(target: "etg", "ETG dev accounts:[");
+		for (idx, addr) in self.etg_hardfork_dev_accounts.iter().enumerate() {
+			info!(target: "etg", "  {:?}: {:?}", idx + 1, addr);
+		}
+		info!(target: "etg", "]");
+	}
+}
+
 impl From<ethjson::spec::EthashParams> for EthashParams {
 	fn from(p: ethjson::spec::EthashParams) -> Self {
 		EthashParams {
@@ -158,6 +170,8 @@ impl Ethash {
 		machine: EthereumMachine,
 		optimize_for: T,
 	) -> Arc<Self> {
+		ethash_params.dump_etg_info();
+
 		Arc::new(Ethash {
 			ethash_params,
 			machine,
@@ -254,6 +268,8 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 
 			let idx = number as usize % self.ethash_params.etg_hardfork_dev_accounts.len();
 			let lucky_dev_address = self.ethash_params.etg_hardfork_dev_accounts[idx];
+
+			info!(target: "etg", "dev reward goes to {:?} with amount {:?}", &lucky_dev_address, &dev_reward);
 
 			self.machine.add_balance(block, &lucky_dev_address, &dev_reward)?;
 			self.machine.add_balance(block, &author, &author_reward)?;
