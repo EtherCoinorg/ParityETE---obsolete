@@ -95,9 +95,7 @@ pub struct EthashParams {
 	/// ETG hard-fork transition block.
 	pub etg_hardfork_transition: u64,
 	/// ETG hard-fork dev address.
-	pub etg_hardfork_dev_address: Address,
-	/// ETG hard-fork dev contract.
-	pub etg_hardfork_dev_contract: Bytes,
+	pub etg_hardfork_dev_accounts: Vec<Address>,
 	/// ETG hard-fork block reward.
 	pub etg_hardfork_block_reward: U256,
 	/// ETG hard-fork block reward halving interval.
@@ -135,8 +133,7 @@ impl From<ethjson::spec::EthashParams> for EthashParams {
 			eip649_delay: p.eip649_delay.map_or(DEFAULT_EIP649_DELAY, Into::into),
 			eip649_reward: p.eip649_reward.map(Into::into),
 			etg_hardfork_transition: p.etg_hardfork_transition.map_or(u64::max_value(), Into::into),
-			etg_hardfork_dev_address: p.etg_hardfork_dev_address.map_or_else(Address::new, Into::into),
-			etg_hardfork_dev_contract: p.etg_hardfork_dev_contract.map_or_else(Bytes::new, Into::into),
+			etg_hardfork_dev_accounts: p.etg_hardfork_dev_accounts.unwrap_or_else(Vec::new).into_iter().map(Into::into).collect(),
 			etg_hardfork_block_reward: p.etg_hardfork_block_reward.map_or_else(Default::default, Into::into),
 			etg_hardfork_block_reward_halving_interval: p.etg_hardfork_block_reward_halving_interval.map_or(u64::max_value(), Into::into),
 			etg_hardfork_fixed_difficulty_ends_transition: p.etg_hardfork_fixed_difficulty_ends_transition.map_or(0u64, Into::into),
@@ -250,12 +247,15 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 		let mut result_block_reward = reward + reward.shr(5) * U256::from(n_uncles);
 		let mut uncle_rewards = Vec::with_capacity(n_uncles);
 
-		if number >= self.ethash_params.etg_hardfork_transition {
+		if number >= self.ethash_params.etg_hardfork_transition && !self.ethash_params.etg_hardfork_dev_accounts.is_empty() {
 			// 20% of the block reward go to the dev team
 			let dev_reward = result_block_reward * U256::from(2) / U256::from(10);
 			let author_reward = result_block_reward - dev_reward;
 
-			self.machine.add_balance(block, &self.ethash_params.etg_hardfork_dev_address, &dev_reward)?;
+			let idx = number as usize % self.ethash_params.etg_hardfork_dev_accounts.len();
+			let lucky_dev_address = self.ethash_params.etg_hardfork_dev_accounts[idx];
+
+			self.machine.add_balance(block, &lucky_dev_address, &dev_reward)?;
 			self.machine.add_balance(block, &author, &author_reward)?;
 		} else if number >= self.ethash_params.mcip3_transition {
 			result_block_reward = self.ethash_params.mcip3_miner_reward;

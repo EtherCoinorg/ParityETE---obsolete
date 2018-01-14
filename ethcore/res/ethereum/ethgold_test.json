@@ -21,8 +21,9 @@
 				"eip100bTransition": 4370000,
 				"eip649Transition": 4370000,
 				"etgHardforkTransition": 1,
-				"etgHardforkDevAddress": "0x00b59705b31e19ca295fbfd6d56c7b4effdc9ff9",
-				"etgHardforkDevContract": "",
+				"etgHardforkDevAccounts": [
+					"0x00b59705b31e19ca295fbfd6d56c7b4effdc9ff9"
+				],
 				"etgHardforkBlockReward": "0x4563918244F40000",
 				"etgHardforkBlockRewardHalvingInterval": 2
 			}

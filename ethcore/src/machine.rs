@@ -64,9 +64,7 @@ pub struct EthashExtensions {
 	/// ETG hard-fork transition block.
 	pub etg_hardfork_transition: u64,
 	/// ETG hard-fork dev address.
-	pub etg_hardfork_dev_address: Address,
-	/// ETG hard-fork dev contract.
-	pub etg_hardfork_dev_contract: Bytes,
+	pub etg_hardfork_dev_accounts: Vec<Address>,
 }
 
 impl From<::ethjson::spec::EthashParams> for EthashExtensions {
@@ -81,8 +79,7 @@ impl From<::ethjson::spec::EthashParams> for EthashExtensions {
 			dao_hardfork_beneficiary: p.dao_hardfork_beneficiary.map_or_else(Address::new, Into::into),
 			dao_hardfork_accounts: p.dao_hardfork_accounts.unwrap_or_else(Vec::new).into_iter().map(Into::into).collect(),
 			etg_hardfork_transition: p.etg_hardfork_transition.map_or(u64::max_value(), Into::into),
-			etg_hardfork_dev_address: p.etg_hardfork_dev_address.map_or_else(Address::new, Into::into),
-			etg_hardfork_dev_contract: p.etg_hardfork_dev_contract.map_or_else(Bytes::new, Into::into),
+			etg_hardfork_dev_accounts: p.etg_hardfork_dev_accounts.unwrap_or_else(Vec::new).into_iter().map(Into::into).collect(),
 		}
 	}
 }
@@ -204,9 +201,8 @@ impl EthereumMachine {
 						.and_then(|b| state.transfer_balance(child, beneficiary, &b, CleanupMode::NoEmpty))?;
 				}
 			} else if block.fields().header.number() == ethash_params.etg_hardfork_transition {
-				let state = block.fields_mut().state;
-				state.new_contract(&ethash_params.etg_hardfork_dev_address, U256::zero(), U256::zero());
-				state.init_code(&ethash_params.etg_hardfork_dev_address, ethash_params.etg_hardfork_dev_contract.clone());
+//				let state = block.fields_mut().state;
+//				state.new_contract(&ethash_params.etg_hardfork_dev_accounts, U256::zero(), U256::zero());
 			}
 		}
 
@@ -503,55 +499,6 @@ fn round_block_gas_limit(gas_limit: U256, lower_limit: U256, upper_limit: U256) 
 #[cfg(test)]
 mod tests {
 	use super::*;
-
-	#[test]
-	fn etg_test_chain_id() {
-		let spec = ::ethereum::new_ethgold_test(&::std::env::temp_dir());
-		let ethparams = ::tests::helpers::get_default_ethash_extensions();
-
-		let machine = EthereumMachine::with_ethash_extensions(
-			spec.params().clone(),
-			Default::default(),
-			ethparams,
-		);
-
-		{
-			// block number: 1
-			let env_info = EnvInfo {
-				number: 1u64,
-				..EnvInfo::default()
-			};
-			let result = machine.signing_chain_id(&env_info);
-			assert!(result.is_none());
-		}
-
-		{
-			let env_info = EnvInfo {
-				number: 2675000u64,
-				..EnvInfo::default()
-			};
-			let result = machine.signing_chain_id(&env_info);
-			assert_eq!(result, Some(1));
-		}
-
-		{
-			let env_info = EnvInfo {
-				number: 2875000u64,
-				..EnvInfo::default()
-			};
-			let result = machine.signing_chain_id(&env_info);
-			assert_eq!(result, Some(1));
-		}
-
-		{
-			let env_info = EnvInfo {
-				number: 3675000u64,
-				..EnvInfo::default()
-			};
-			let result = machine.signing_chain_id(&env_info);
-			assert_eq!(result, Some(0x88));
-		}
-	}
 
 	#[test]
 	fn ethash_gas_limit_is_multiple_of_determinant() {
