@@ -178,7 +178,7 @@ impl IoHandler<ClientIoMessage> for ClientIoHandler {
 	fn initialize(&self, io: &IoContext<ClientIoMessage>) {
 		io.register_timer(CLIENT_TICK_TIMER, CLIENT_TICK_MS).expect("Error registering client timer");
 		io.register_timer(SNAPSHOT_TICK_TIMER, SNAPSHOT_TICK_MS).expect("Error registering snapshot timer");
-        io.register_timer(BLOCK_MINER_TIMER, BLOCK_MINER_TICK_MS).expect("Error registering client block miner timer");
+		io.register_timer(BLOCK_MINER_TIMER, BLOCK_MINER_TICK_MS).expect("Error registering client block miner timer");
 	}
 
 	fn timeout(&self, _io: &IoContext<ClientIoMessage>, timer: TimerToken) {
@@ -189,7 +189,7 @@ impl IoHandler<ClientIoMessage> for ClientIoHandler {
 				self.client.tick(snapshot_restoration)
 			},
 			SNAPSHOT_TICK_TIMER => self.snapshot.tick(),
-            BLOCK_MINER_TIMER => self.client.try_generate_empty_block(),
+			BLOCK_MINER_TIMER => self.client.try_generate_empty_block(),
 			_ => warn!("IO service triggered unregistered timer '{}'", timer),
 		}
 	}
