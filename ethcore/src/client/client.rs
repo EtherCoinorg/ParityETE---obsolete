@@ -506,6 +506,10 @@ impl Client {
 		(map_to_vec(enacted), map_to_vec(retracted))
 	}
 
+	pub fn try_generate_empty_block(&self) {
+		self.miner.try_generate_empty_block(self);
+	}
+
 	/// This is triggered by a message coming from a block queue when the block is ready for insertion
 	pub fn import_verified_blocks(&self) -> usize {
 

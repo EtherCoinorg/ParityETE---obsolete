@@ -361,6 +361,13 @@ impl Miner {
 		)
 	}
 
+	/// Try to generate empty blocks if force_sealing is set.
+	pub fn try_generate_empty_block(&self, chain: &MiningBlockChainClient) {
+		if self.forced_sealing() {
+			self.update_sealing(chain);
+		}
+	}
+
 	#[cfg_attr(feature="dev", allow(match_same_arms))]
 	/// Prepares new block for sealing including top transactions from queue.
 	fn prepare_block(&self, chain: &MiningBlockChainClient) -> (ClosedBlock, Option<H256>) {
