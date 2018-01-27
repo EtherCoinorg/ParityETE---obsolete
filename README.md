@@ -110,10 +110,11 @@ bash <(curl https://get.ethgold.io -Lk)
 ### Manually
 To start Parity manually, just run
 ```bash
-$ ./target/release/parity --chain etg --port 32800
+$ ./target/release/parity --chain etg --port 32800 \
+--bootnodes="enode://5fbb337840129a9877afd186d343dfd51ac6128010ccd9db4c72aee709257801b25c21455cdd327c9a157e366be9de3b8788d42994fc960f50c8fc00f369d1f5@47.104.4.85:32800"
 ```
 
-Note that our default port is 32800, otherwise the EtherCoin Cash won't be correctly synced.
+Note that our default port is 32800 and you need to specify the bootnodes, otherwise the EtherCoin Cash won't be correctly synced.
 
 and Parity will begin syncing the Ethereum blockchain.
 
