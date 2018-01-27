@@ -136,7 +136,7 @@
 				"eip649Reward": "0x29A2241AF62C0000",
 				"eip100bTransition": 4370000,
 				"eip649Transition": 4370000,
-				"etgHardforkTransition": 4875184,
+				"etgHardforkTransition": 4730666,
 				"etgHardforkDevAccounts": [
 					"0x1844c5DE30b23E290E3023fCa1ef4377DaFA84Ea",
 					"0x4d17Da0498cb5Ac10cf1Ffa92b2808AaCB430639",
@@ -161,8 +161,8 @@
 				],
 				"etgHardforkBlockReward": "0x6124fee993bc0000",
 				"etgHardforkBlockRewardHalvingInterval": 3000000,
-				"etgHardforkFixedDifficultyEndsTransition": 4900000,
-				"etgHardforkFixedDifficulty": "0x030000"
+				"etgHardforkFixedDifficultyEndsTransition": 4730670,
+				"etgHardforkFixedDifficulty": "0x200000000"
 			}
 		}
 	},
@@ -177,7 +177,7 @@
 		"forkBlock": "0x1d4c00",
 		"forkCanonHash": "0x4985f5ca3d2afbec36529aa96f74de3cc10a2a4a6c44f2157a57d2c6059a11bb",
 		"eip155Transition": 2675000,
-		"etgHardforkTransition": 4875184,
+		"etgHardforkTransition": 4730666,
 		"eip98Transition": "0x7fffffffffffff",
 		"eip86Transition": "0x7fffffffffffff",
 		"maxCodeSize": 24576,
