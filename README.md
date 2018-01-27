@@ -106,12 +106,14 @@ $ ~/.cargo/bin/cargo build --release
 bash <(curl https://get.parity.io -Lk)
 ```
 
-## Start Parity
+## Start ParityETG
 ### Manually
 To start Parity manually, just run
 ```bash
-$ ./target/release/parity
+$ ./target/release/parity --chain etg --port 32800
 ```
+
+Note that our default port is 32800, otherwise the EtherCoin Cash won't be correctly synced.
 
 and Parity will begin syncing the Ethereum blockchain.
 
