@@ -1,4 +1,4 @@
-# [Parity For EthGold](https://ethgold.io/) - fast, light, and robust Ethereum Gold client
+# [Parity For EtherCoin](https://ethercoin.vc/) - fast, light, and robust Ethereum Gold client
 
 [![build status](https://gitlab.ethgold.io/parity/parity/badges/master/build.svg)](https://gitlab.ethgold.io/parity/parity/commits/master)
 [![Snap Status](https://build.snapcraft.io/badge/paritytech/parity.svg)](https://build.snapcraft.io/user/paritytech/parity)
