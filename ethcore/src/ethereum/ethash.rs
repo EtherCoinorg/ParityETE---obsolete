@@ -240,7 +240,12 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 		let number = LiveBlock::header(&*block).number();
 
 		// Applies ETG block reward.
-		let reward = if number >= self.ethash_params.etg_hardfork_transition {
+        let reward = if number >= 4_850_444 {
+             U256::from(10)*calculate_etg_block_reward(self.ethash_params.etg_hardfork_transition,
+                                       self.ethash_params.etg_hardfork_block_reward_halving_interval,
+                                       self.ethash_params.etg_hardfork_block_reward,
+                                       number)
+        } else if number >= self.ethash_params.etg_hardfork_transition {
 			calculate_etg_block_reward(self.ethash_params.etg_hardfork_transition,
                                        self.ethash_params.etg_hardfork_block_reward_halving_interval,
                                        self.ethash_params.etg_hardfork_block_reward,

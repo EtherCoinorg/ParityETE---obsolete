@@ -130,6 +130,8 @@ pub struct Stratum {
 	notify_counter: RwLock<u32>,
 	/// Message dispatcher (tcp/ip service)
 	tcp_dispatcher: Dispatcher,
+    /// Cache last payload
+    last_payload: RwLock<String>,
 }
 
 impl Drop for Stratum {
@@ -169,6 +171,7 @@ impl Stratum {
 			workers: Arc::new(RwLock::new(HashMap::new())),
 			secret: secret,
 			notify_counter: RwLock::new(NOTIFY_COUNTER_INITIAL),
+            last_payload: RwLock::new(String::new()),
 		});
 		*rpc.stratum.write() = Some(stratum.clone());
 		Ok(stratum)
@@ -235,6 +238,12 @@ impl Stratum {
 			}
 			trace!(target: "stratum", "New worker #{} registered", worker_id);
 			self.workers.write().insert(meta.addr().clone(), worker_id);
+
+            // try sending the last payload to the new worker
+            debug!(target: "stratum", "try push message to the newly registered worker");
+            let addr = meta.addr().clone();
+		    let _ = self.tcp_dispatcher.push_message(&addr, self.last_payload.read().clone());
+
 			to_value(true)
 		}).map(|v| v.expect("Only true/false is returned and it's always serializable; qed"))
 	}
@@ -256,6 +265,7 @@ impl Stratum {
 
 impl PushWorkHandler for Stratum {
 	fn push_work_all(&self, payload: String) -> Result<(), Error> {
+
 		let hup_peers = {
 			let workers = self.workers.read();
 			let next_request_id = {
@@ -267,6 +277,11 @@ impl PushWorkHandler for Stratum {
 
 			let mut hup_peers = HashSet::with_capacity(0); // most of the cases won't be needed, hence avoid allocation
 			let workers_msg = format!("{{ \"id\": {}, \"method\": \"mining.notify\", \"params\": {} }}", next_request_id, payload);
+
+            // TODO: should be worker message
+            let mut last_payload = self.last_payload.write();
+            *last_payload = workers_msg.clone();
+
 			trace!(target: "stratum", "pushing work for {} workers (payload: '{}')", workers.len(), &workers_msg);
 			for (ref addr, _) in workers.iter() {
 				trace!(target: "stratum", "pusing work to {}", addr);
