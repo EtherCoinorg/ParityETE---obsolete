@@ -24,6 +24,7 @@ use cache::{NodeCache, NodeCacheBuilder};
 use seed_compute::SeedHashCompute;
 use shared::*;
 use std::io;
+use progpow::{create_light_cache,get_block_progpow_hash};
 
 use std::mem;
 use std::path::Path;
@@ -131,6 +132,12 @@ pub fn quick_get_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> 
 pub fn light_compute(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
 	let full_size = get_data_size(light.block_number);
 	hash_compute(light, full_size, header_hash, nonce)
+}
+
+pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
+	let mix_hash = [0; 32];
+	let value = [0; 32];
+	ProofOfWork { mix_hash: mix_hash, value: value }
 }
 
 fn hash_compute(light: &Light, full_size: usize, header_hash: &H256, nonce: u64) -> ProofOfWork {
@@ -391,6 +398,19 @@ mod test {
 		let result = light_compute(&light, &hash, nonce);
 		assert_eq!(result.mix_hash[..], mix_hash[..]);
 		assert_eq!(result.value[..], boundary[..]);
+
+		let cache: &[Node] = light.cache.as_ref();
+		let len = cache.len();
+		println!("light cache len {} {}", len, get_cache_size(486382)/64);
+		for i in 0..len {
+			let buf = cache[i].clone();
+			unsafe { create_light_cache((len-i-1) as u32, buf.as_bytes()); }
+		}
+
+		let mut out = [0; 64];
+		let _x = unsafe {
+			get_block_progpow_hash(486382/30000, &hash, nonce, &mut out)
+		};		
 	}
 
 	#[test]

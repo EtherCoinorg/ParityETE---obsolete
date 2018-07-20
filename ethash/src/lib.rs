@@ -20,6 +20,7 @@ extern crate primal;
 extern crate parking_lot;
 extern crate either;
 extern crate memmap;
+extern crate hash as progpow;
 
 #[macro_use]
 extern crate crunchy;

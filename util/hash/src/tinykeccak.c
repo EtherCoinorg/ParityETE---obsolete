@@ -179,7 +179,7 @@ typedef int bool;
 #define ETHASH_REVISION (23)
 #define ETHASH_DATASET_BYTES_INIT (1073741824U) // 2**30
 #define ETHASH_DATASET_BYTES_GROWTH 8388608U  // 2**23
-#define ETHASH_CACHE_BYTES_INIT (1073741824U) // 2**24
+#define ETHASH_CACHE_BYTES_INIT 1677216U // 2**24
 #define ETHASH_CACHE_BYTES_GROWTH 131072U  // 2**17
 #define ETHASH_EPOCH_LENGTH 30000U
 #define ETHASH_MIX_BYTES 128
@@ -808,6 +808,7 @@ int calculate_light_cache_num_items(int epoch_number)
 
     int num_items_upper_bound = num_items_init + epoch_number * num_items_growth;
     int num_items = ethash_find_largest_prime(num_items_upper_bound);
+    //printf("epoch %d cache num %d\n", epoch_number, num_items);    
     return num_items;
 }
 
@@ -827,14 +828,9 @@ int calculate_full_dataset_num_items(int epoch_number)
 static void
 set_epoch_context(int epoch_number, epoch_context* ctx, hash512* light_cache) 
 {
-    //size_t context_alloc_size = sizeof(hash512);
-
     int light_cache_num_items = calculate_light_cache_num_items(epoch_number);
-    //size_t light_cache_size = get_light_cache_size(light_cache_num_items);
-    //size_t alloc_size = context_alloc_size + light_cache_size;
-
     int full_dataset_num_items = calculate_full_dataset_num_items(epoch_number);
-    
+    //printf("epoch %d cache num %d\n", epoch_number, light_cache_num_items);
     ctx->epoch_number = epoch_number;
     ctx->light_cache_num_items = light_cache_num_items;
     ctx->light_cache = light_cache;
@@ -905,13 +901,13 @@ void create_light_cache(uint32_t index, uint8_t value[64])
         }
         g_light_cache = malloc(64*(index+1));
         g_total = index+1;
-        //printf("alloc %d\n", g_total);
+        //if(g_light_cache) printf("alloc %d\n", g_total);
     }
-    memcpy(g_light_cache+index, value, 64);
+    memcpy(&g_light_cache[index], value, 64);
 }
 
 int32_t 
-get_block_progpow_hash(uint32_t epoch, uint8_t header[64],
+get_block_progpow_hash(uint32_t epoch, uint8_t header[32],
                        uint64_t nonce, uint8_t out[64])
 {
     ethash_return_value_t r;
@@ -957,7 +953,7 @@ inline void to_array (const std::string& hex, uint8_t *out)
         int l = parse_digit(hex[i]);
         out[i/2] = uint8_t((h<<4) | l);
     }
-}
+}hash512
 
 
 main() 
