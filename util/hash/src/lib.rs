@@ -35,6 +35,9 @@ extern {
 	pub fn keccak_256(out: *mut u8, outlen: usize, input: *const u8, inputlen: usize) -> i32;
 	/// Hashes input. Returns -1 if either out or input does not exist. Otherwise returns 0.
 	pub fn keccak_512(out: *mut u8, outlen: usize, input: *const u8, inputlen: usize) -> i32;
+    pub fn get_block_progpow_hash(epoch: u32, header: *const [u8; 64],
+                                  nonce: u64, out: *mut [u8; 64]) -> i32;
+    pub fn create_light_cache(index: u32, value: *const [u8; 64]);
 }
 
 pub fn keccak<T: AsRef<[u8]>>(s: T) -> H256 {
@@ -78,6 +81,8 @@ mod tests {
 	use std::io::{Write, BufReader};
 	use self::tempdir::TempDir;
 	use super::{keccak, keccak_buffer, KECCAK_EMPTY};
+    use create_light_cache;
+	use get_block_progpow_hash;
 
 	#[test]
 	fn keccak_empty() {
@@ -106,5 +111,22 @@ mod tests {
 
 		// then
 		assert_eq!(format!("{:?}", hash), "68371d7e884c168ae2022c82bd837d51837718a7f7dfb7aa3f753074a35e1d87");
+	}
+
+	#[test]
+	fn santify_progpow() {
+		let len = 20000000;
+		let header = [0; 64];
+		let mut out = [0; 64];
+		let x = unsafe {
+			for i in 0..len {
+				let buf = [0;64];
+				create_light_cache((len-i-1) as u32, &buf);
+			}
+			let a = [0; 1];
+			get_block_progpow_hash(1392, &header, 0x123, &mut out)
+		};
+
+		println!("buffer: {}", x);    		
 	}
 }
