@@ -131,6 +131,7 @@ impl EthashManager {
 				Some(light) => light,
 			}
 		};
+		// TODO add progpow check here? also change to use memmap for light_cache?
 		light.compute(header_hash, nonce)
 	}
 }

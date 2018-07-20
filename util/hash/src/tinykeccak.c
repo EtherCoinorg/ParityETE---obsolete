@@ -894,6 +894,7 @@ get_block_progpow_hash_from_mix(uint8_t *header, uint8_t *mix,
     return 0;
 }
 
+#include <stdlib.h>
 uint32_t g_total = 0;
 hash512* g_light_cache = 0;
 void create_light_cache(uint32_t index, uint8_t value[64]) 
@@ -904,7 +905,7 @@ void create_light_cache(uint32_t index, uint8_t value[64])
         }
         g_light_cache = malloc(64*(index+1));
         g_total = index+1;
-        printf("alloc %d\n", g_total);
+        //printf("alloc %d\n", g_total);
     }
     memcpy(g_light_cache+index, value, 64);
 }

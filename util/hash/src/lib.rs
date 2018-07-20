@@ -118,15 +118,15 @@ mod tests {
 		let len = 20000000;
 		let header = [0; 64];
 		let mut out = [0; 64];
-		let x = unsafe {
+		let _x = unsafe {
 			for i in 0..len {
 				let buf = [0;64];
 				create_light_cache((len-i-1) as u32, &buf);
 			}
-			let a = [0; 1];
+
 			get_block_progpow_hash(1392, &header, 0x123, &mut out)
 		};
 
-		println!("buffer: {}", x);    		
+		//println!("buffer: {}", x);    		
 	}
 }
