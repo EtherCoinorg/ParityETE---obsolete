@@ -25,6 +25,7 @@ use seed_compute::SeedHashCompute;
 use shared::*;
 use std::io;
 use progpow::{create_light_cache,get_block_progpow_hash};
+use ethcore_bigint::hash::H256 as biH256;
 
 use std::mem;
 use std::path::Path;
@@ -151,6 +152,8 @@ pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWo
 	mix_hash[..].clone_from_slice(&out[0..32]);
 	let mut value: [u8;32] = [0;32];
 	for i in 0..32 { value[i] = out[32+i]; }
+	println!("v {}", biH256(value));
+	println!("mix {}", biH256(mix_hash));
 	ProofOfWork { mix_hash: mix_hash, value: value }
 }
 

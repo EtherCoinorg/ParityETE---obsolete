@@ -21,6 +21,7 @@ extern crate parking_lot;
 extern crate either;
 extern crate memmap;
 extern crate hash as progpow;
+extern crate ethcore_bigint;
 
 #[macro_use]
 extern crate crunchy;
