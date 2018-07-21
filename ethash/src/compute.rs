@@ -135,8 +135,22 @@ pub fn light_compute(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWo
 }
 
 pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
-	let mix_hash = [0; 32];
-	let value = [0; 32];
+	let cache: &[Node] = light.cache.as_ref();
+	let len = cache.len();
+	println!("light cache len {} {}", len, get_cache_size(light.block_number)/64);
+	for i in 0..len {
+		let buf = cache[i].clone();
+		unsafe { create_light_cache((len-i-1) as u32, buf.as_bytes()); }
+	}
+
+	let mut out = [0; 64];
+	let _x = unsafe {
+		get_block_progpow_hash((light.block_number/30000) as u32, header_hash, nonce, &mut out)
+	};		
+	let mut mix_hash: [u8;32] = [0;32];
+	mix_hash[..].clone_from_slice(&out[0..32]);
+	let mut value: [u8;32] = [0;32];
+	for i in 0..32 { value[i] = out[32+i]; }
 	ProofOfWork { mix_hash: mix_hash, value: value }
 }
 
@@ -399,18 +413,7 @@ mod test {
 		assert_eq!(result.mix_hash[..], mix_hash[..]);
 		assert_eq!(result.value[..], boundary[..]);
 
-		let cache: &[Node] = light.cache.as_ref();
-		let len = cache.len();
-		println!("light cache len {} {}", len, get_cache_size(486382)/64);
-		for i in 0..len {
-			let buf = cache[i].clone();
-			unsafe { create_light_cache((len-i-1) as u32, buf.as_bytes()); }
-		}
-
-		let mut out = [0; 64];
-		let _x = unsafe {
-			get_block_progpow_hash(486382/30000, &hash, nonce, &mut out)
-		};		
+		let r = light_progpow(&light, &hash, nonce);	
 	}
 
 	#[test]
