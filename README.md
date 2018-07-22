@@ -45,6 +45,17 @@ Parity's current release is 1.7. You can download it at https://github.com/parit
 
 We recommend installing Rust through [rustup](https://www.rustup.rs/). If you don't already have rustup, you can install it like this:
 
+- Ubuntu:
+	```bash
+	apt install build-essential
+	apt install pkg-config
+	apt install libssl-dev
+	apt install libudev-dev
+ 	source $HOME/.cargo/env
+	rustup toolchain install 1.26.0
+	rustup default 1.26.0
+	rustup run 1.26.0 cargo build --release
+	```
 - Linux:
 	```bash
 	$ curl https://sh.rustup.rs -sSf | sh
