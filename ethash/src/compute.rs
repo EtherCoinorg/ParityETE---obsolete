@@ -56,7 +56,9 @@ impl Light {
 		block_number: u64,
 	) -> Self {
 		let cache = builder.new_cache(cache_dir.to_path_buf(), block_number);
-
+		if block_number > PROGPOW_START {
+			unsafe { create_light_cache((block_number/ETHASH_EPOCH_LENGTH) as u32) }
+		}
 		Light {
 			block_number: block_number,
 			cache: cache,
@@ -67,7 +69,11 @@ impl Light {
 	/// `header_hash` - The header hash to pack into the mix
 	/// `nonce` - The nonce to pack into the mix
 	pub fn compute(&self, header_hash: &H256, nonce: u64) -> ProofOfWork {
-		light_compute(self, header_hash, nonce)
+		if self.block_number > PROGPOW_START {
+			light_progpow(self, header_hash, nonce)
+		} else {
+		    light_compute(self, header_hash, nonce)
+		}
 	}
 
 	pub fn from_file_with_builder(
@@ -415,7 +421,7 @@ mod test {
 		assert_eq!(result.mix_hash[..], mix_hash[..]);
 		assert_eq!(result.value[..], boundary[..]);
 
-		let r = light_progpow(&light, &hash, nonce);	
+		let _ = light_progpow(&light, &hash, nonce);	
 	}
 
 	#[test]
