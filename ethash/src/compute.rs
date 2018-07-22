@@ -139,14 +139,13 @@ pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWo
 	let cache: &[Node] = light.cache.as_ref();
 	let len = cache.len();
 	println!("light cache len {} {}", len, get_cache_size(light.block_number)/64);
-	for i in 0..len {
-		let buf = cache[i].clone();
-		unsafe { create_light_cache((len-i-1) as u32, buf.as_bytes()); }
-	}
+
+	unsafe { create_light_cache((light.block_number/30000) as u32); }
+
 
 	let mut out = [0; 64];
 	let _x = unsafe {
-		get_block_progpow_hash((light.block_number/30000) as u32, header_hash, nonce, &mut out)
+		get_block_progpow_hash(header_hash, nonce, &mut out)
 	};		
 	let mut mix_hash: [u8;32] = [0;32];
 	mix_hash[..].clone_from_slice(&out[0..32]);

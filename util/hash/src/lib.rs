@@ -35,9 +35,9 @@ extern {
 	pub fn keccak_256(out: *mut u8, outlen: usize, input: *const u8, inputlen: usize) -> i32;
 	/// Hashes input. Returns -1 if either out or input does not exist. Otherwise returns 0.
 	pub fn keccak_512(out: *mut u8, outlen: usize, input: *const u8, inputlen: usize) -> i32;
-    pub fn get_block_progpow_hash(epoch: u32, header: *const [u8; 32],
+    pub fn get_block_progpow_hash(header: *const [u8; 32],
                                   nonce: u64, out: *mut [u8; 64]) -> i32;
-    pub fn create_light_cache(index: u32, value: *const [u8; 64]);
+    pub fn create_light_cache(epoch: u32);
 }
 
 pub fn keccak<T: AsRef<[u8]>>(s: T) -> H256 {
@@ -119,12 +119,8 @@ mod tests {
 		let header = [0; 32];
 		let mut out = [0; 64];
 		let _x = unsafe {
-			for i in 0..len {
-				let buf = [0;64];
-				create_light_cache((len-i-1) as u32, &buf);
-			}
-
-			get_block_progpow_hash(486382/30000, &header, 0x123, &mut out)
+			create_light_cache(486382/30000);
+			get_block_progpow_hash(&header, 0x123, &mut out)
 		}; 		
 	}
 }
