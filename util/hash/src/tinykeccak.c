@@ -1128,6 +1128,14 @@ progpow_kernel(	hash256* ret, const epoch_context* context, const uint64_t seed,
 }
 
 #include <stdio.h>
+#include <stdlib.h>
+static void b2s(const uint8_t* b, size_t len, char *note) {
+    for (size_t i=0;i<len;i++){
+        printf("%02x", b[i]);
+    }
+    printf(" %s \n", note);
+}
+
 static void
 progpow(
        ethash_return_value_t* ret,
@@ -1140,13 +1148,11 @@ progpow(
     
     uint64_t seed = keccak_f800(header_hash, nonce, result);
 
-    progpow_kernel(&ret->mix_hash, ctx, seed, calculate_dataset_item_progpow, calculate_L1dataset_item);
+    progpow_kernel(&ret->mix_hash, ctx, seed, calculate_dataset_item_progpow,
+        calculate_L1dataset_item);
 
     keccak_f800_arr(ret->result.hwords, header_hash, seed, ret->mix_hash.hwords);
-    for (int i=0;i<8;i++){
-        printf("%08x", ret->result.hwords[i]);
-    }
-    printf(" ret->result \n");
+    //b2s(ret->result.hwords, 32, "ret->result");
 }
 
 
@@ -1179,7 +1185,7 @@ uint32_t calculate_full_dataset_num_items(uint32_t epoch_number)
 
 /**************API********************************/
 
-#include <stdlib.h>
+
 epoch_context g_ctx;
 hash512* create_light_cache(uint32_t epoch) 
 {
@@ -1200,18 +1206,20 @@ hash512* create_light_cache(uint32_t epoch)
     return g_ctx.light_cache;
 }
 
+#include <inttypes.h>
 void 
 get_from_mix(uint8_t header[32], uint64_t nonce, uint8_t mix[32], uint8_t out[32])
 {
+    //b2s(header, 32, "header");
+    //b2s(mix, 32, "mix");
+    //printf("%" PRIx64 "\n", nonce);
     uint32_t result[4] = {0};    
     uint64_t seed = keccak_f800((const hash256*)header, nonce, result);
 
     keccak_f800_arr((uint32_t*)out, (const hash256*)header, seed, (const uint32_t*)mix);
-    for (int i=0;i<32;i++){
-        printf("%02x", out[i]);
-    }
-    printf(" difficulity \n");
+    //b2s(out, 32, "difficulty");
 }
+
 
 void 
 get_block_progpow_hash(uint8_t header[32],

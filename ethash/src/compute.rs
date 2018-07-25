@@ -72,7 +72,7 @@ impl Light {
 		if block_number > PROGPOW_START {
 			light_progpow(self, header_hash, nonce)
 		} else {
-			println!("light_compute at {} {:x}", block_number, nonce);
+			//println!("light_compute at {} {:x}", block_number, nonce);
 		    light_compute(self, header_hash, nonce)
 		}
 	}
@@ -104,16 +104,13 @@ fn fnv_hash(x: u32, y: u32) -> u32 {
 }
 
 pub fn quick_get_progpow_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> H256 {
-	println!("h {}", biH256(*header_hash));
-	println!("n {:x}", nonce);
-	println!("m {}", biH256(*mix_hash));
 	let mut out = [0; 32];
 	let _ = unsafe {
 		get_from_mix(header_hash, nonce, mix_hash, &mut out);
 	};		
 	let mut value: [u8;32] = [0;32];
 	value[..].clone_from_slice(&out[0..32]);
-	println!("v {}", biH256(value));
+	//println!("v {}", biH256(value));
 	value
 }
 /// Difficulty quick check for POW preverification
@@ -160,23 +157,18 @@ pub fn light_compute(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWo
 }
 
 pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
-	let cache: &[Node] = light.cache.as_ref();
-	let len = cache.len();
-	println!("light cache len {} {}", len, get_cache_size(light.block_number)/64);
-
+	// just in case light cache is not created before
 	unsafe { create_light_cache((light.block_number/30000) as u32); }
-
 
 	let mut out = [0; 64];
 	let _x = unsafe {
 		get_block_progpow_hash(header_hash, nonce, &mut out)
 	};		
 	let mut mix_hash: [u8;32] = [0;32];
-	mix_hash[..].clone_from_slice(&out[0..32]);
+	mix_hash[..].clone_from_slice(&out[32..64]);
 	let mut value: [u8;32] = [0;32];
-	for i in 0..32 { value[i] = out[32+i]; }
-	println!("v {}", biH256(value));
-	println!("mix {}", biH256(mix_hash));
+	for i in 0..32 { value[i] = out[i]; }
+	//println!("bnd {}", biH256(value));
 	ProofOfWork { mix_hash: mix_hash, value: value }
 }
 
