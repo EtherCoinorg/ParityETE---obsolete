@@ -22,7 +22,7 @@ pub const CACHE_BYTES_INIT: u64 = 1 << 24;
 pub const CACHE_BYTES_GROWTH: u64 = 1 << 17;
 
 pub const ETHASH_EPOCH_LENGTH: u64 = 30000;
-pub const PROGPOW_START: u64 = 9_123_123;
+pub const PROGPOW_START: u64 = 5_260_709;
 pub const ETHASH_CACHE_ROUNDS: usize = 3;
 pub const ETHASH_MIX_BYTES: usize = 128;
 pub const ETHASH_ACCESSES: usize = 64;

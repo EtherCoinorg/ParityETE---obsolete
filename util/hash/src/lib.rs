@@ -37,6 +37,8 @@ extern {
 	pub fn keccak_512(out: *mut u8, outlen: usize, input: *const u8, inputlen: usize) -> i32;
     pub fn get_block_progpow_hash(header: *const [u8; 32],
                                   nonce: u64, out: *mut [u8; 64]) -> i32;
+	pub fn get_from_mix(header: *const [u8; 32], nonce: u64,
+	  mix: *const [u8;32], out: *mut [u8; 32]) -> i32;
     pub fn create_light_cache(epoch: u32);
 }
 
@@ -83,6 +85,7 @@ mod tests {
 	use super::{keccak, keccak_buffer, KECCAK_EMPTY};
     use create_light_cache;
 	use get_block_progpow_hash;
+	use get_from_mix;
 
 	#[test]
 	fn keccak_empty() {
@@ -115,12 +118,22 @@ mod tests {
 
 	#[test]
 	fn santify_progpow() {
-		let len = 294911;
 		let header = [0; 32];
 		let mut out = [0; 64];
-		let _x = unsafe {
+		let _ = unsafe {
 			create_light_cache(486382/30000);
 			get_block_progpow_hash(&header, 0x123, &mut out)
 		}; 		
 	}
+
+	#[test]
+	fn santify_quick_progpow() {
+		let header = [0; 32];
+		let mix = [0;32];
+		let mut out = [0; 32];
+		let _ = unsafe {
+			get_from_mix(&header, 0x123, &mix, &mut out)
+		}; 		
+	}
+
 }

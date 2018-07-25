@@ -24,7 +24,7 @@ use cache::{NodeCache, NodeCacheBuilder};
 use seed_compute::SeedHashCompute;
 use shared::*;
 use std::io;
-use progpow::{create_light_cache,get_block_progpow_hash};
+use progpow::{create_light_cache, get_block_progpow_hash, get_from_mix};
 use ethcore_bigint::hash::H256 as biH256;
 
 use std::mem;
@@ -68,10 +68,11 @@ impl Light {
 	/// Calculate the light boundary data
 	/// `header_hash` - The header hash to pack into the mix
 	/// `nonce` - The nonce to pack into the mix
-	pub fn compute(&self, header_hash: &H256, nonce: u64) -> ProofOfWork {
-		if self.block_number > PROGPOW_START {
+	pub fn compute(&self, block_number: u64, header_hash: &H256, nonce: u64) -> ProofOfWork {
+		if block_number > PROGPOW_START {
 			light_progpow(self, header_hash, nonce)
 		} else {
+			println!("light_compute at {} {:x}", block_number, nonce);
 		    light_compute(self, header_hash, nonce)
 		}
 	}
@@ -102,13 +103,30 @@ fn fnv_hash(x: u32, y: u32) -> u32 {
 	return x.wrapping_mul(FNV_PRIME) ^ y;
 }
 
+pub fn quick_get_progpow_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> H256 {
+	println!("h {}", biH256(*header_hash));
+	println!("n {:x}", nonce);
+	println!("m {}", biH256(*mix_hash));
+	let mut out = [0; 32];
+	let _ = unsafe {
+		get_from_mix(header_hash, nonce, mix_hash, &mut out);
+	};		
+	let mut value: [u8;32] = [0;32];
+	value[..].clone_from_slice(&out[0..32]);
+	println!("v {}", biH256(value));
+	value
+}
 /// Difficulty quick check for POW preverification
 ///
 /// `header_hash`      The hash of the header
 /// `nonce`            The block's nonce
 /// `mix_hash`         The mix digest hash
 /// Boundary recovered from mix hash
-pub fn quick_get_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> H256 {
+pub fn quick_get_difficulty(block_number: u64, header_hash: &H256, nonce: u64,
+  mix_hash: &H256) -> H256 {
+	if block_number > PROGPOW_START {
+		return quick_get_progpow_difficulty(header_hash, nonce, mix_hash)
+	}
 	unsafe {
 		// This is safe - the `keccak_512` call below reads the first 40 bytes (which we explicitly set
 		// with two `copy_nonoverlapping` calls) but writes the first 64, and then we explicitly write

@@ -565,7 +565,7 @@ impl LockedBlock {
 	) -> Result<SealedBlock, (Error, LockedBlock)> {
 		let mut s = self;
 		s.block.header.set_seal(seal);
-
+		println!("try_seal {}", s.block.header.number());
 		// TODO: passing state context to avoid engines owning it?
 		match engine.verify_local_seal(&s.block.header) {
 			Err(e) => Err((e, s)),
