@@ -32,7 +32,7 @@ export const ETH_TOKEN = {
   image: imagesEthereum,
   name: 'Ethereum',
   native: true,
-  tag: 'ETH'
+  tag: 'ETE'
 };
 
 export function fetchTokenIds (tokenregInstance) {

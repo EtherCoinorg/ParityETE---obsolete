@@ -18,7 +18,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
 const SYMBOL_ETC = 'ETC';
-const SYMBOL_ETH = 'ETH';
+const SYMBOL_ETH = 'ETE';
 const SYMBOL_EXP = 'EXP';
 const SYMBOL_MUSIC = 'MUSIC';
 

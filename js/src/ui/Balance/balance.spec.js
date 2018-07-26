@@ -23,7 +23,7 @@ import apiutil from '~/api/util';
 import { Balance } from './balance';
 
 const TOKENS = {
-  'eth': { tag: 'ETH' },
+  'eth': { tag: 'ETE' },
   'gav': { tag: 'GAV', format: 1 },
   'tst': { tag: 'TST', format: 1 }
 };
