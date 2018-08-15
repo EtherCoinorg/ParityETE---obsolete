@@ -274,7 +274,7 @@ impl Engine<EthereumMachine> for Arc<Ethash> {
 			let idx = number as usize % self.ethash_params.etg_hardfork_dev_accounts.len();
 			let lucky_dev_address = self.ethash_params.etg_hardfork_dev_accounts[idx];
 
-			//info!(target: "etg", "dev reward goes to {:?} with amount {:?}", &lucky_dev_address, &dev_reward);
+			info!(target: "etg", "dev reward goes to {:?} with amount {:?}", &lucky_dev_address, &dev_reward);
 
 			self.machine.add_balance(block, &lucky_dev_address, &dev_reward)?;
 			self.machine.add_balance(block, &author, &author_reward)?;
