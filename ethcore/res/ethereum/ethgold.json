@@ -202,6 +202,8 @@
 		"stateRoot": "0xd7f8974fb5ac78d9ac099b9ad5018bedc2ce0a72dad1827a1709da30580f0544"
 	},
 	"nodes": [
+                "enode://9fce8413c4e77984cbaebc849e61392cf9fb753c6a532b5781dfc35340eb9b102fbcfdaa18dfb8bb98ff4b1e88a045c91bae29fe3cf8e4e1782b996a55c71a1b@206.189.75.108:32800",
+                "enode://67ce25dc308305ef74ac9898eae1af32e89d0f4a5616c030ce9bbc752e690623c581417a86d0e5981368e3a1d6d784faf22f3dbc2fd8380474fa1347c7e09614@167.99.226.115:32800"
 	],
 	"accounts": {
 		"0000000000000000000000000000000000000001": { "builtin": { "name": "ecrecover", "pricing": { "linear": { "base": 3000, "word": 0 } } } },

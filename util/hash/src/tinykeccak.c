@@ -752,6 +752,7 @@ typedef struct
     uint32_t light_cache_num_items;
     hash512* light_cache;
     uint32_t full_dataset_num_items;
+    uint32_t refcount;
 } epoch_context;
 
 static
@@ -1129,12 +1130,15 @@ progpow_kernel(	hash256* ret, const epoch_context* context, const uint64_t seed,
 
 #include <stdio.h>
 #include <stdlib.h>
+
+/*
 static void b2s(const uint8_t* b, size_t len, char *note) {
     for (size_t i=0;i<len;i++){
         printf("%02x", b[i]);
     }
     printf(" %s \n", note);
 }
+*/
 
 static void
 progpow(
@@ -1187,22 +1191,37 @@ uint32_t calculate_full_dataset_num_items(uint32_t epoch_number)
 
 
 epoch_context g_ctx;
+
 hash512* create_light_cache(uint32_t epoch) 
-{
+{  
+    while (g_ctx.refcount) {
+        // busy wait
+        usleep(1000);
+    }     
     if (g_ctx.epoch_number == epoch && g_ctx.light_cache) {
         return g_ctx.light_cache;
     }
-    if (g_ctx.light_cache) {
-        free(g_ctx.light_cache); 
-    }
-    g_ctx.light_cache_num_items = calculate_light_cache_num_items(epoch);
-    g_ctx.full_dataset_num_items = calculate_full_dataset_num_items(epoch);
-    g_ctx.light_cache = malloc(g_ctx.light_cache_num_items * 64);
-    g_ctx.epoch_number = epoch;
 
+    /* about to create new light_cache, should put a lock to block new progpow_hash call */
+    g_ctx.refcount = 1;
+
+    uint32_t lcni = calculate_light_cache_num_items(epoch);
+    hash512* cache =  malloc(lcni * 64);
     hash256 epoch_seed = {0};
     calculate_epoch_seed(&epoch_seed, epoch);
-    build_light_cache(g_ctx.light_cache, g_ctx.light_cache_num_items, &epoch_seed);
+    build_light_cache(cache, lcni, &epoch_seed);
+    // assume at this point all the ongoing progpow_hash calls are done
+    printf("!!! build_light_cache %d\n", epoch);
+    if (g_ctx.light_cache) {
+        printf("!!! free light_cache for %d\n", g_ctx.epoch_number);
+        free(g_ctx.light_cache); 
+    }
+    g_ctx.light_cache_num_items = lcni;
+    g_ctx.full_dataset_num_items = calculate_full_dataset_num_items(epoch);
+    g_ctx.light_cache = cache;
+    g_ctx.epoch_number = epoch;
+
+    g_ctx.refcount = 0;
     return g_ctx.light_cache;
 }
 
@@ -1221,6 +1240,9 @@ get_from_mix(uint8_t header[32], uint64_t nonce, uint8_t mix[32], uint8_t out[32
 }
 
 
+/*
+  Assume checking light_cache is ready before access
+*/
 void 
 get_block_progpow_hash(uint8_t header[32],
                        uint64_t nonce, uint8_t out[64])

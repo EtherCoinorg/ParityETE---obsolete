@@ -41,7 +41,7 @@ const MIN_MEM_LIMIT: usize = 16384;
 const MIN_QUEUE_LIMIT: usize = 512;
 
 // maximum possible number of verification threads.
-const MAX_VERIFIERS: usize = 1;
+const MAX_VERIFIERS: usize = 8;
 
 /// Type alias for block queue convenience.
 pub type BlockQueue = VerificationQueue<self::kind::Blocks>;
