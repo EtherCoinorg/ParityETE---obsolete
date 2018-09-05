@@ -1,5 +1,5 @@
 {
-	"name": "EthGold",
+	"name": "Ethercoin",
 	"dataDir": "etg",
 	"engine": {
 		"Ethash": {
