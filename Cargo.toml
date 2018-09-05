@@ -1,9 +1,9 @@
 [package]
 description = "ParityETG Ethereum client"
-name = "parityetg"
+name = "parityete"
 version = "1.8.4"
 license = "GPL-3.0"
-authors = ["Parity Technologies <admin@parity.io>, EthGold Team"]
+authors = ["Parity Technologies <admin@parity.io>, Ethercoin Team"]
 build = "build.rs"
 
 [dependencies]
@@ -108,7 +108,7 @@ secretstore = ["ethcore-secretstore"]
 
 [[bin]]
 path = "parity/main.rs"
-name = "parityetg"
+name = "parityete"
 
 [profile.dev]
 panic = "abort"

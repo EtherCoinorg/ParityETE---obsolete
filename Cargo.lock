@@ -2364,7 +2364,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "parityetg"
+name = "parityete"
 version = "1.8.4"
 dependencies = [
  "ansi_term 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
