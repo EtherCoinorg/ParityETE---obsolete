@@ -43,8 +43,8 @@ pub enum SpecType {
 
 impl Default for SpecType {
 	fn default() -> Self {
-		// TODO: switch to EthGold
-		SpecType::Foundation
+		// default to Ethercoin
+		SpecType::EthGold
 	}
 }
 

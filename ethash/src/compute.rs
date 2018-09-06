@@ -24,6 +24,8 @@ use cache::{NodeCache, NodeCacheBuilder};
 use seed_compute::SeedHashCompute;
 use shared::*;
 use std::io;
+use progpow::{create_light_cache, get_block_progpow_hash, get_from_mix};
+use ethcore_bigint::hash::H256 as biH256;
 
 use std::mem;
 use std::path::Path;
@@ -54,7 +56,9 @@ impl Light {
 		block_number: u64,
 	) -> Self {
 		let cache = builder.new_cache(cache_dir.to_path_buf(), block_number);
-
+		if block_number > PROGPOW_START {
+			unsafe { create_light_cache((block_number/ETHASH_EPOCH_LENGTH) as u32) }
+		}
 		Light {
 			block_number: block_number,
 			cache: cache,
@@ -64,8 +68,13 @@ impl Light {
 	/// Calculate the light boundary data
 	/// `header_hash` - The header hash to pack into the mix
 	/// `nonce` - The nonce to pack into the mix
-	pub fn compute(&self, header_hash: &H256, nonce: u64) -> ProofOfWork {
-		light_compute(self, header_hash, nonce)
+	pub fn compute(&self, block_number: u64, header_hash: &H256, nonce: u64) -> ProofOfWork {
+		if block_number > PROGPOW_START {
+			light_progpow(self, header_hash, nonce)
+		} else {
+			//println!("light_compute at {} {:x}", block_number, nonce);
+		    light_compute(self, header_hash, nonce)
+		}
 	}
 
 	pub fn from_file_with_builder(
@@ -94,13 +103,27 @@ fn fnv_hash(x: u32, y: u32) -> u32 {
 	return x.wrapping_mul(FNV_PRIME) ^ y;
 }
 
+pub fn quick_get_progpow_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> H256 {
+	let mut out = [0; 32];
+	let _ = unsafe {
+		get_from_mix(header_hash, nonce, mix_hash, &mut out);
+	};		
+	let mut value: [u8;32] = [0;32];
+	value[..].clone_from_slice(&out[0..32]);
+	//println!("v {}", biH256(value));
+	value
+}
 /// Difficulty quick check for POW preverification
 ///
 /// `header_hash`      The hash of the header
 /// `nonce`            The block's nonce
 /// `mix_hash`         The mix digest hash
 /// Boundary recovered from mix hash
-pub fn quick_get_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> H256 {
+pub fn quick_get_difficulty(block_number: u64, header_hash: &H256, nonce: u64,
+  mix_hash: &H256) -> H256 {
+	if block_number > PROGPOW_START {
+		return quick_get_progpow_difficulty(header_hash, nonce, mix_hash)
+	}
 	unsafe {
 		// This is safe - the `keccak_512` call below reads the first 40 bytes (which we explicitly set
 		// with two `copy_nonoverlapping` calls) but writes the first 64, and then we explicitly write
@@ -131,6 +154,22 @@ pub fn quick_get_difficulty(header_hash: &H256, nonce: u64, mix_hash: &H256) -> 
 pub fn light_compute(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
 	let full_size = get_data_size(light.block_number);
 	hash_compute(light, full_size, header_hash, nonce)
+}
+
+pub fn light_progpow(light: &Light, header_hash: &H256, nonce: u64) -> ProofOfWork {
+	// just in case light cache is not created before
+	unsafe { create_light_cache((light.block_number/30000) as u32); }
+
+	let mut out = [0; 64];
+	let _x = unsafe {
+		get_block_progpow_hash(header_hash, nonce, &mut out)
+	};		
+	let mut mix_hash: [u8;32] = [0;32];
+	mix_hash[..].clone_from_slice(&out[32..64]);
+	let mut value: [u8;32] = [0;32];
+	for i in 0..32 { value[i] = out[i]; }
+	//println!("bnd {}", biH256(value));
+	ProofOfWork { mix_hash: mix_hash, value: value }
 }
 
 fn hash_compute(light: &Light, full_size: usize, header_hash: &H256, nonce: u64) -> ProofOfWork {
@@ -391,6 +430,8 @@ mod test {
 		let result = light_compute(&light, &hash, nonce);
 		assert_eq!(result.mix_hash[..], mix_hash[..]);
 		assert_eq!(result.value[..], boundary[..]);
+
+		let _ = light_progpow(&light, &hash, nonce);	
 	}
 
 	#[test]

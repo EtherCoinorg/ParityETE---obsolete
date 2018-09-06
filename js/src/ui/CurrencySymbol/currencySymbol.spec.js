@@ -63,7 +63,7 @@ describe('ui/CurrencySymbol', () => {
 
   describe('currencies', () => {
     it('renders ETH as default', () => {
-      expect(render().text()).equal('ETH');
+      expect(render().text()).equal('ETE');
     });
 
     it('renders ETC for classic', () => {
@@ -79,7 +79,7 @@ describe('ui/CurrencySymbol', () => {
     });
 
     it('renders ETH as default', () => {
-      expect(render('somethingElse').text()).equal('ETH');
+      expect(render('somethingElse').text()).equal('ETE');
     });
   });
 
@@ -89,7 +89,7 @@ describe('ui/CurrencySymbol', () => {
     });
 
     it('render ETH as default', () => {
-      expect(render().instance().renderSymbol()).equal('ETH');
+      expect(render().instance().renderSymbol()).equal('ETE');
     });
 
     it('render ETC', () => {

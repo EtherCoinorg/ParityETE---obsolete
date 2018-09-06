@@ -20,6 +20,8 @@ extern crate primal;
 extern crate parking_lot;
 extern crate either;
 extern crate memmap;
+extern crate hash as progpow;
+extern crate ethcore_bigint;
 
 #[macro_use]
 extern crate crunchy;
@@ -131,7 +133,8 @@ impl EthashManager {
 				Some(light) => light,
 			}
 		};
-		light.compute(header_hash, nonce)
+		// TODO add progpow check here? also change to use memmap for light_cache?
+		light.compute(block_number, header_hash, nonce)
 	}
 }
 

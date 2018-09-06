@@ -128,13 +128,13 @@ class Peers extends Component {
                 <th>
                   <FormattedMessage
                     id='status.peers.table.header.ethHeader'
-                    defaultMessage='Header (ETH)'
+                    defaultMessage='Header (ETE)'
                   />
                 </th>
                 <th>
                   <FormattedMessage
                     id='status.peers.table.header.ethDiff'
-                    defaultMessage='Difficulty (ETH)'
+                    defaultMessage='Difficulty (ETE)'
                   />
                 </th>
                 <th>

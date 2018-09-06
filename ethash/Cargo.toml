@@ -13,6 +13,7 @@ parking_lot = "0.4"
 crunchy = "0.1.0"
 memmap = "0.5.2"
 either = "1.0.0"
+ethcore-bigint = { path = "../util/bigint" }
 
 [features]
 benches = []
