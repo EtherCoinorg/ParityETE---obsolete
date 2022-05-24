@@ -1,10 +1,10 @@
-# [Parity For EthGold](https://ethgold.io/) - fast, light, and robust Ethereum Gold client
+# [Parity For Ethercoin](https://ethercoin.org/) - fast, light, and robust Ethercoin client
 
-[![build status](https://gitlab.ethgold.io/parity/parity/badges/master/build.svg)](https://gitlab.ethgold.io/parity/parity/commits/master)
+[![build status](https://gitlab.ethcoin.org/parity/parity/badges/master/build.svg)](https://gitlab.ethercoin.org/parity/parity/commits/master)
 [![Snap Status](https://build.snapcraft.io/badge/paritytech/parity.svg)](https://build.snapcraft.io/user/paritytech/parity)
 [![GPLv3](https://img.shields.io/badge/license-GPL%20v3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-- [Download the latest release here.](https://github.com/EthGold/ParityETG/releases)
+- [Download the latest release here.](https://github.com/Ethcoinorg/ParityETE/releases)
 
 ### Join the chat!
 
